@@ -97,14 +97,20 @@ docker run -d -p 6379:6379 redis:alpine
 ### 2. Backend Setup
 
 ```bash
-cd "d:\Peak Path\backend"
+cd backend
+
+# Create virtual environment
+python -m venv venv
 
 # Activate virtual environment
-.\venv\Scripts\Activate.ps1    # PowerShell
-# OR
-.\venv\Scripts\activate.bat    # CMD
+# On Windows (PowerShell):
+.\venv\Scripts\Activate.ps1
+# On Windows (CMD):
+.\venv\Scripts\activate.bat
+# On macOS/Linux:
+source venv/bin/activate
 
-# Install dependencies (already done if following setup order)
+# Install dependencies
 pip install -r requirements.txt
 
 # The database is created automatically when you run the app.
@@ -133,8 +139,8 @@ Email:    arjun@example.com    Password: User@123
 ### 3. Frontend Setup
 
 ```bash
-cd "d:\Peak Path\frontend"
-npm install     # Already done during project setup
+cd frontend
+npm install
 ```
 
 ---
@@ -154,34 +160,34 @@ sudo service redis-server start
 
 ### Terminal 2 — Flask Backend
 ```bash
-cd "d:\Peak Path\backend"
-.\venv\Scripts\Activate.ps1
+cd backend
+# (Activate virtualenv first)
 python app.py
 # Runs on http://localhost:5000
 ```
 
 ### Terminal 3 — Vue Frontend
 ```bash
-cd "d:\Peak Path\frontend"
+cd frontend
 npm run dev
 # Runs on http://localhost:5173
 ```
 
 ### Terminal 4 — Celery Worker
 ```bash
-cd "d:\Peak Path\backend"
-.\venv\Scripts\Activate.ps1
+cd backend
+# (Activate virtualenv first)
 
 # --pool=solo is required on Windows (prefork pool not supported)
-.\venv\Scripts\celery -A app.celery worker --loglevel=info --pool=solo
+celery -A app.celery worker --loglevel=info --pool=solo
 ```
 
 ### Terminal 5 — Celery Beat (Scheduler)
 ```bash
-cd "d:\Peak Path\backend"
-.\venv\Scripts\Activate.ps1
+cd backend
+# (Activate virtualenv first)
 
-.\venv\Scripts\celery -A app.celery beat --loglevel=info
+celery -A app.celery beat --loglevel=info
 ```
 
 ---
@@ -198,14 +204,15 @@ cd "d:\Peak Path\backend"
 
 ### Test Daily Reminders (Manual Trigger)
 ```bash
-cd "d:\Peak Path\backend"
-.\venv\Scripts\Activate.ps1
+cd backend
+# (Activate virtualenv first)
 
 # Start local SMTP debug server first:
-python -m smtpd -n -c DebuggingServer localhost:1025
+pip install aiosmtpd
+aiosmtpd -n -l localhost:1025
 
 # In another terminal, trigger the task manually:
-.\venv\Scripts\python -c "
+python -c "
 from app import create_app
 app = create_app()
 with app.app_context():
@@ -217,7 +224,7 @@ print('Task queued')
 
 ### Test Monthly Report (Manual Trigger)
 ```bash
-.\venv\Scripts\python -c "
+python -c "
 from app import create_app
 app = create_app()
 with app.app_context():
@@ -277,7 +284,7 @@ FLASK_DEBUG=true
 |---------|----------|
 | `redis.exceptions.ConnectionError` | Ensure Redis is running (`redis-cli ping`) |
 | Celery worker not processing tasks | Check `--pool=solo` flag on Windows |
-| `ModuleNotFoundError` | Activate virtualenv: `.\venv\Scripts\Activate.ps1` |
+| `ModuleNotFoundError` | Activate virtualenv: `.\venv\Scripts\Activate.ps1` (or `source venv/bin/activate` on macOS/Linux) |
 | CORS errors | Ensure Flask runs on port 5000 and Vite proxy is active |
 | Port 5173 already in use | Change port in `vite.config.js` |
 | Database not found | Run `python app.py` once — it creates `peakpath.db` automatically |
